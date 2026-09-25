@@ -4,5 +4,6 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-{: .prompt-tip }
+# About
+
+This site is a personal project page for Rover, an ESP-32 powered car controlled through a hosted web server.
