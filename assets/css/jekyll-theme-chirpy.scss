@@ -113,12 +113,20 @@
 /* Keep project navigation prominent while making utility links secondary. */
 #sidebar .sidebar-nav {
   display: flex;
+  flex-direction: column;
+}
+
+#sidebar .primary-nav,
+#sidebar .secondary-nav {
+  flex-direction: column;
+  width: 100%;
 }
 
 #sidebar .secondary-nav {
   margin-top: auto;
   margin-bottom: 1rem;
 }
+
 #sidebar .secondary-nav li.nav-item:not(:first-child) {
   margin-top: 0;
 }
