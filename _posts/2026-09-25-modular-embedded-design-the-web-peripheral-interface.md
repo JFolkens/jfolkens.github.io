@@ -1,9 +1,10 @@
 ---
-icon: fas fa-network-wired
-order: 4
+title: "Modular Embedded Design: The Web-Peripheral Interface"
+date: 2026-09-25 09:00:00 -0500
+categories: [Rover, Web, Architecture]
+tags: [esp32, embedded, web, peripherals, architecture]
 ---
 
-# Modular Embedded Design: The Web-Peripheral Interface
 
 One common issue with embedded development is testing incremental stages without leaving novels of commented out code lying around. Rover is designed to be iterated on; it is fundamentally a platform for adding and testing new embedded sensors/controls (and - let's be honest - it is also a really cool toy).
 
@@ -12,15 +13,15 @@ The web-peripheral interface means that new Peripheral types can be created with
 This was especially useful for developing Rover's drivetrain as a composite peripheral - instead of testing the entire platform "all at once". The Drivetrain itself is composed of four Motor objects. Each Motor is actually a PWM with two direction GPIOs (gpio-forward and gpio-reverse). Rover began with a single PWM and two GPIOs. I sat on my couch and confirmed that I could move a single wheel forwards and backwards, at different speeds. Then I formed the Motor interface and confirmed that I could still move the wheel. Then I wrote Drivetrain as four wheels. I still have the PWM web interface as a class in my codebase - not an old branch on Github, but something I can quickly add back in.
 
 
-![Rover on blocks stub](/assets/img/rover/rover-on-blocks.png)
+![Rover on blocks stub](/assets/img/rover/placeholder.jpg)
 
 *Stub: Picture of Rover on blocks so I can test the wheels without it running off*
 
 ## Peripheral Interface
 
-The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to `DeviceWebApp`.
+The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/device_web_app.h).
 
-![Motor webpage stub](/assets/img/rover/motor-webpage-stub.png)
+![Motor webpage stub](/assets/img/rover/placeholder.jpg)
 
 *Stub: image HTML page with multiple cards.*
 
@@ -31,7 +32,7 @@ That gives the page a simple, modular feel:
 - peripherals can be added or removed without redesigning the whole site
 - the UI stays useful while the hardware is still in flux
 
-The content of each card is defined by the PeripheralInterface class. The `LedWeb` class has a button that toggles between **Turn ON** and **Turn OFF**. `PwmWeb` is a slider from 0 to 100 percent duty cycle.
+The content of each card is defined by the [`PeripheralInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/peripheral_interface.h) class. The [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/led_web.cpp) class has a button that toggles between **Turn ON** and **Turn OFF**. [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) is a slider from 0 to 100 percent duty cycle.
 
 Each new `PeripheralInterface` class must define:
 - The visual HTML representation (state and controls)
@@ -42,7 +43,7 @@ The parent constructor `PeripheralInterface` takes in the peripheral name (`gree
 
 ## Integrating Peripherals
 
-`DeviceWebApp` is a wrapper around a list of `PeripheralInterface` objects and an `HttpServer` instance. It renders the overall HTML page, provides the header, and calls the appropriate function for each registered peripheral. It also owns the `HttpServer` and registers the URI endpoints needed for the callbacks. This keeps endpoint and server logic away from the peripheral development process.
+[`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/device_web_app.h) is a wrapper around a list of `PeripheralInterface` objects and an `HttpServer` instance. It renders the overall HTML page, provides the header, and calls the appropriate function for each registered peripheral. It also owns the `HttpServer` and registers the URI endpoints needed for the callbacks. This keeps endpoint and server logic away from the peripheral development process.
 
 Once a class implements `PeripheralInterface`, adding additional instances is as straightforward as calling `device_web_app->add_peripheral(...)`.
 
@@ -67,11 +68,11 @@ class PeripheralInterface {
 };
 ```
 
-![LED on/off stub](/assets/img/rover/led-toggle-stub.png)
+![LED on/off stub](/assets/img/rover/placeholder.jpg)
 
 *Stub: image showing an LED turning on and off through the web interface.*
 
-![Rover peripheral cards page stub](/assets/img/rover/web-peripheral-cards-stub.png)
+![Rover peripheral cards page stub](/assets/img/rover/placeholder.jpg)
 
 
 *Stub: screenshot of the Rover webpage showing multiple peripheral cards rendered top to bottom, including one or more debug-oriented cards.*
