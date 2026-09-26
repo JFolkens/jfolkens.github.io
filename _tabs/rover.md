@@ -13,11 +13,11 @@ _The modular embedded development platform_
 
 ## What’s here
 
-- [Overview](/posts/overview/)
-- [Modular Design: The Web-Peripheral Interface](/posts/modular-embedded-design-the-web-peripheral-interface/)
-- [Evaluating Binary Size and Updating Partition Table](/posts/evaluating-binary-size-and-updating-partition-table/)
-- [Embedding Assets on ESP32](/posts/binary-assets-on-esp32/)
-- [Local GTest Build for Rover](/posts/local-gtest-build-for-rover/)
+- Overview *(coming soon)*
+- [Modular Embedded Design: The Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %})
+- Evaluating Binary Size and Updating the Partition Table *(coming soon)*
+- [Binary Assets on ESP32]({% post_url 2026-09-25-binary-assets-on-esp32 %})
+- [Local GTest Build for Rover]({% post_url 2026-09-25-local-gtest-build %})
 
 ## Notes
 
