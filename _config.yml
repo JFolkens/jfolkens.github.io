@@ -14,12 +14,12 @@ timezone:
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: Rover # the main title
+title: JFolkens # the main title
 
 tagline: A personal project log # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
-  A personal project site for Rover, an ESP-32 powered car controlled through a hosted web server.
+  A personal project site. Currently the only project is Rover, an ESP-32 powered car controlled through a hosted web server.
 
 # Fill in the protocol & hostname for your site.
 # E.g. 'https://username.github.io', note that it does not end with a '/'.
@@ -31,14 +31,13 @@ github:
 social:
   # Will be displayed as the default author of the posts and the copyright owner in the Footer
   name: JFolkens
-  email: jfolkens.oh@gmail.com
-  fediverse_handle: # fill in your fediverse handle. E.g. "@username@domain.com"
+  email: "jfolkens.oh@gmail.com"
   links:
     # The first element serves as the copyright owner's link
     - https://github.com/JFolkens
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.linkedin.com/in/joy-folkens-a49893230
 
 # Site Verification Settings
 webmaster_verifications:
@@ -218,7 +217,7 @@ exclude:
   - "package*.json"
 
 jekyll-archives:
-  enabled: [categories, tags]
+  enabled: []
   layouts:
     category: category
     tag: tag
