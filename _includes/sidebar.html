@@ -15,8 +15,8 @@
     <p class="site-subtitle fst-italic mb-0">{{ site.tagline }}</p>
   </header>
 
-  <nav class="flex-column flex-grow-1 w-100 ps-0">
-    <ul class="nav">
+  <nav class="sidebar-nav flex-column flex-grow-1 w-100 ps-0">
+    <ul class="nav primary-nav">
       <li class="nav-item{% if page.layout == 'home' %} active{% endif %}">
         <a href="{{ '/' | relative_url }}" class="nav-link">
           <i class="fa-fw fas fa-home"></i>
@@ -25,17 +25,29 @@
       </li>
 
       {% for tab in site.tabs %}
-        {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
-        {% assign utility_tab = false %}
-        {% if tab_name == 'about' or tab_name == 'categories' or tab_name == 'tags' %}
-          {% assign utility_tab = true %}
+        {% unless tab.nav_group == 'secondary' %}
+          {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+          <li class="nav-item{% if tab.url == page.url %} active{% endif %}">
+            <a href="{{ tab.url | relative_url }}" class="nav-link">
+              <i class="fa-fw {{ tab.icon }}"></i>
+              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+            </a>
+          </li>
+        {% endunless %}
+      {% endfor %}
+    </ul>
+
+    <ul class="nav secondary-nav">
+      {% for tab in site.tabs %}
+        {% if tab.nav_group == 'secondary' %}
+          {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+          <li class="nav-item{% if tab.url == page.url %} active{% endif %}">
+            <a href="{{ tab.url | relative_url }}" class="nav-link">
+              <i class="fa-fw {{ tab.icon }}"></i>
+              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title }}</span>
+            </a>
+          </li>
         {% endif %}
-        <li class="nav-item{% if tab.url == page.url %} active{% endif %}{% if utility_tab %} utility-tab{% endif %}">
-          <a href="{{ tab.url | relative_url }}" class="nav-link">
-            <i class="fa-fw {{ tab.icon }}"></i>
-            <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
-          </a>
-        </li>
       {% endfor %}
     </ul>
   </nav>
