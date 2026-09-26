@@ -1,5 +1,6 @@
 ---
 layout: tags
 icon: fas fa-tags
-order: 2
+order: 99
+nav_group: secondary
 ---
