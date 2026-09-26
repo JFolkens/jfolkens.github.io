@@ -1,0 +1,27 @@
+---
+---
+
+@use 'main';
+
+/* Keep project navigation prominent while making utility tabs secondary. */
+#sidebar .nav-item.utility-tab {
+  opacity: 0.5;
+}
+
+#sidebar .nav-item.utility-tab .nav-link {
+  font-size: 0.75rem;
+  min-height: 2.25rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Let one flexible gap separate the primary and secondary navigation groups. */
+#sidebar nav .nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#sidebar .nav-item.utility-tab:not(.utility-tab + .utility-tab) {
+  margin-top: auto;
+}

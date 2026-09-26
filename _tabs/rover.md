@@ -3,7 +3,6 @@ icon: fas fa-car
 order: 3
 ---
 
-# Rover
 _The modular embedded development platform_
 
 Rover is an ESP-32 powered car controlled through a hosted web server.
