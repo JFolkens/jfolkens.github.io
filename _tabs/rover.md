@@ -13,12 +13,11 @@ _The modular embedded development platform_
 
 ## What’s here
 
-- Overview
-- Modular Design: The Web-Peripheral Interface
-- Evaluating Binary Size and Updating Partition Table
-- Embedding Assets on ESP32
-- Architecture: Unit Tests for Embedded Design
-  - Mocking Embedded Functionality: Logging and Binary Assets
+- [Overview](/posts/overview/)
+- [Modular Design: The Web-Peripheral Interface](/posts/modular-embedded-design-the-web-peripheral-interface/)
+- [Evaluating Binary Size and Updating Partition Table](/posts/evaluating-binary-size-and-updating-partition-table/)
+- [Embedding Assets on ESP32](/posts/binary-assets-on-esp32/)
+- [Local GTest Build for Rover](/posts/local-gtest-build-for-rover/)
 
 ## Notes
 
