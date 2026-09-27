@@ -14,7 +14,8 @@ An on-target test is one that is compiled and run on the embedded platform prope
 
 Off-target tests are tests that compile and run locally on a non-embedded computer. They will miss bugs specific to the embedded libraries. However, they force you to isolate the truly embedded code from higher level logic. This makes code more easily portable to different target platforms. I have also found that off-target tests tend to be run more often; the Rover unit tests are part of the pre-commit pipeline, so I can not avoid running them regularly.
 
-Both on and off-target tests are important. For an example of on-target debugging, see [Modular Embedded Design: The Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}). This post covers off-target tests using the GoogleTest framework.
+Both on and off-target tests are important. For an example of on-target debugging, see {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>. This post covers off-target tests using the GoogleTest framework.
 
 ## Writing Embedded Code That Can Be Tested
 
@@ -29,9 +30,8 @@ For example, each PWM should be able to `set_speed`, `get_speed`, and `turn_off`
 
 Finally, there is the `tests` folder. Note that while ESP32 libraries can not be compiled locally, the test code likewise can not be compiled on-target (and absolutely does not belong on an embedded device, where flash size is constrained).
 
-![Unit test architecture stub](/assets/img/placeholder.jpg)
-
-*Stub: architecture diagram showing host-side unit tests, the HAL layer, and the ESP32-specific implementation layer.*
+![Unit test architecture stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
+*Placeholder: architecture diagram showing host-side unit tests, the HAL layer, and the ESP32-specific implementation layer.*
 
 The next section shows the magic of compiling the right code into the right places at the right time.
 
@@ -41,6 +41,7 @@ The test entry point is [`tests/run_unit_tests.bat`](https://github.com/JFolkens
 
 A default ESP32 project looks for source code in the `main` folder. I use VS Code with the ESP-IDF extension and did not have issues with ESP32 and the root-level `CMakeLists.txt` trying to compile my `tests` folder (I did have issues trying to rename `main` to `src`, but decided it wasn't worth fighting ESP32 on that one).
 
+```text
 rover/
 ├── main/
 |   ├── esp32/
@@ -51,6 +52,7 @@ rover/
 |   ├── run_unit_tests.bat
 |   ├── CMakeLists.txt
 ├── CMakeLists.txt
+```
 
 What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/tests/CMakeLists.txt) does is:
 
@@ -61,8 +63,7 @@ What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug
 
 The script `run_unit_tests.bat` runs the resulting test executeable.
 
-![Local test runner stub](/assets/img/placeholder.jpg)
-
+![Local test runner stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
 *Stub: screenshot of the unit test script and test output in a terminal window.*
 
 ## Pre-commit Integration
@@ -71,21 +72,19 @@ The final piece is integrating unit tests with pre-commit hooks. Unit tests are 
 
 Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
 
-![Pre-commit yaml stub](/assets/img/placeholder.jpg)
-
+![Pre-commit yaml stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
 *Stub: Picture of pre-commit-config.yaml*
 
 Python projects can use `pip install pre-commit` to access the handy CLI `pre-commit` command. I don't feel like putting `pre-commit` in my base environment or creating a Rover python venv, so when I want to run pre-commit checks without commiting I use `.git/hooks/pre-commit`. Or, the `run_unit_tests.bat` script.
 
-![Pre-commit hook stub](/assets/img/placeholder.jpg)
-
+![Pre-commit hook stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
 *Stub: Picture of running pre-commit command*
 
 ## Example: `HttpServerInterface`
 
 `HttpServer` is a hardware device with non-trivial logic and testing.
 
-
+```text
 rover/
 ├── main/
 |   ├── esp32/
@@ -99,6 +98,7 @@ rover/
 |   ├── hal/
 |   |   ├── http_server/
 |   |   |   ├── http_server_interface_tests.cpp
+```
 
 [`HttpServerInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/hal/http_server/http_server_interface.h) covers the routing logic and the helper functions for parsing key-value pairs from URI requests. String parsing and callback logic should be unit tested because it is bug-prone and does not require ESP32 hardware to validate.
 
@@ -114,4 +114,7 @@ The host-side test build lets me exercise the testable logic locally, while the 
 
 The Web Peripheral Interface is a form of on-target debugging. Typically I will start by developing the interface/tests, then the ESP32 integration, and finally adding the new peripheral to the debug web page.
 
-A follow-on post will cover mocking some trickier embedded functionality.
+A future post will cover mocking some trickier embedded functionality.
+
+Up Next: {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-binary-assets-on-esp32.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>

@@ -87,3 +87,7 @@ A big next step is adding the first sensor-based Peripheral type. The Rover curr
 - Have `DeviceWebApp` aware of sensor-vs-control peripherals, and add an optional argument to `add_peripheral()` for a refresh rate.
 
 Another decision is whether the polling happens on the server - in Javascript - or using FreeRTOS for timing (of course the server is running on FreeRTOS, but there are layers of explicitness). The decision of where to put polling logic and what language to write it in must be made together.
+
+
+Up next: {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-local-gtest-build.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
