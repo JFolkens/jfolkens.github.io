@@ -45,25 +45,26 @@ Because Rover uses omni wheels, going "forward" is done by setting [half of the 
 
 And, when I have any issues (say a motor wire snaps), I can quickly revert to a web page with lower-level controls. Instead of guessing why my tiny car is staggering, I can control the wheels individually and quickly isolate the issue.
 
-## Web Peripheral Interface: Implementation
+## Web Peripheral Interface: Adding Peripherals
 
-The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/device_web_app.h).
+Each peripheral appears on the webpage in the order that they were added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/device_web_app.h).
 
-That gives the page a simple, modular feel:
-
-- each peripheral owns its own display and controls
-- the page can show multiple peripherals together
-- peripherals can be added or removed without redesigning the whole site
-- the UI stays useful while the hardware is still in flux
-
-The content of each card is defined by the [`PeripheralInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/peripheral_interface.h) class.
-
-To be a `PeripheralInterface`, you must define:
+To be a peripheral, you must extend the [`PeripheralInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/peripheral_interface.h) class. This means defining:
 - The visual HTML representation (state and controls)
 - Hooks for updating hardware (controls)
 - A hardware update function
 
-The [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/led_web.cpp) class has a button that toggles between **Turn ON** and **Turn OFF**. [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) is a slider from 0 to 100 percent duty cycle.
+![LedWeb Interface](/assets/img/web_server/led_web_interface.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*LedWeb implements the PeripheralInterface*
+
+`LedWeb` is an example of a class that extens `PeripheralInterface`.
+
+
+
+
+
+
+For example, [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/led_web.h) has a button that toggles between **Turn ON** and **Turn OFF**.
 
 The parent constructor `PeripheralInterface` takes in the peripheral name (`green_led`, `front_left_wheel`, etc), and typically an ownership reference to the underlying hardware module (`PwmInterface`, `GpioInterface`, etc).
 
@@ -75,33 +76,6 @@ Once a class implements `PeripheralInterface`, adding additional instances is as
 
 `HttpServer` includes code for parsing URI endpoing key-value pairs. Each Peripheral has a `name`. Update endpoints are of the format `/name/update?key=value&key2=value2`. When `HttpServer` receives a request, it parses the path and key-value parameters and then hands control off to `DeviceWebApp`. Then `DeviceWebApp` does a lookup of peripherals by their name, and calls `peripheral->handle_update()` with a map of parameters.
 
-## Example: `LedWeb`
-
-Each `LedWeb` gets its own card on the page. That card shows the LED’s current state and provides a simple control for turning it on or off.
-
-```cpp
-// Adding a new LED to the webpage
-app->add_peripheral(std::make_shared<LedWeb>(...));
-```
-
-```cpp
-// Example sketch of the interface responsibilities
-class PeripheralInterface {
- public:
-  virtual std::string html_state() = 0;
-  virtual std::string html_control() = 0;
-  virtual void handle_update(...) = 0;
-};
-```
-
-![LED on/off stub](/assets/img/placeholder.jpg)
-
-*Stub: image showing an LED turning on and off through the web interface.*
-
-![Rover peripheral cards page stub](/assets/img/placeholder.jpg)
-
-
-*Stub: screenshot of the Rover webpage showing multiple peripheral cards rendered top to bottom, including one or more debug-oriented cards.*
 
 ## Next Steps
 
