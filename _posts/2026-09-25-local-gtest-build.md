@@ -37,7 +37,7 @@ The next section shows the magic of compiling the right code into the right plac
 
 ## Adding Unit Tests to an ESP32 project
 
-The test entry point is [`tests/run_unit_tests.bat`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/tests/run_unit_tests.bat), which drives the local test workflow. It only works on Windows because I have not had a reason to support Linux yet, but I suspect ChatGPT can write the equivalent `.sh` script. The key is that `run_unit_tests.bat` automates the download and installation of the GTest library to the `tests/.deps` folder. I like this even better than `README` instructions which could be out of date or hard to follow. Before sharing the project, I can remove the `tests/.deps` folder, re-run the tests, and have some hope that another user will be successful.
+The test entry point is [`tests/run_unit_tests.bat`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/tests/run_unit_tests.bat), which drives the local test workflow. It only works on Windows because I have not had a reason to support Linux yet, but I suspect ChatGPT can write the equivalent `.sh` script. The key is that `run_unit_tests.bat` automates the download and installation of the GTest library to the `tests/.deps` folder. I like this even better than `README` instructions which could be out of date or hard to follow. Before sharing the project, I can remove the `tests/.deps` folder, re-run the tests, and have some hope that another user will be successful.
 
 A default ESP32 project looks for source code in the `main` folder. I use VS Code with the ESP-IDF extension and did not have issues with ESP32 and the root-level `CMakeLists.txt` trying to compile my `tests` folder (I did have issues trying to rename `main` to `src`, but decided it wasn't worth fighting ESP32 on that one).
 
@@ -54,7 +54,7 @@ rover/
 ├── CMakeLists.txt
 ```
 
-What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/tests/CMakeLists.txt) does is:
+What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/tests/CMakeLists.txt) does is:
 
 - Confirm GTest is available
 - Exclude `main/esp32` which depends on ESP32 target libraries
@@ -70,7 +70,7 @@ The script `run_unit_tests.bat` runs the resulting test executeable.
 
 The final piece is integrating unit tests with pre-commit hooks. Unit tests are only useful if they are run regularly; otherwise they aren't checking anything. Some projects integrate CI/CD into git or Jenkins pipelines. For small projects, I find it easiest to simply prevent myself from commiting code that fails.
 
-Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
+Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
 
 ![Pre-commit yaml stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
 *Stub: Picture of pre-commit-config.yaml*
@@ -100,9 +100,9 @@ rover/
 |   |   |   ├── http_server_interface_tests.cpp
 ```
 
-[`HttpServerInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/hal/http_server/http_server_interface.h) covers the routing logic and the helper functions for parsing key-value pairs from URI requests. String parsing and callback logic should be unit tested because it is bug-prone and does not require ESP32 hardware to validate.
+[`HttpServerInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/hal/http_server/http_server_interface.h) covers the routing logic and the helper functions for parsing key-value pairs from URI requests. String parsing and callback logic should be unit tested because it is bug-prone and does not require ESP32 hardware to validate.
 
-[`HttpServerESP32`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/esp32/http_server_esp32.h) contains the code needed to implement `HttpServerInterface` on an actual ESP32 device. These function calls can not be tested locally (atleast, not easily - high-end chips tend to ship with simulators, but the $20 ESP32 has no lead time and why simulate when you can just buy one).
+[`HttpServerESP32`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/esp32/http_server_esp32.h) contains the code needed to implement `HttpServerInterface` on an actual ESP32 device. These function calls can not be tested locally (atleast, not easily - high-end chips tend to ship with simulators, but the $20 ESP32 has no lead time and why simulate when you can just buy one).
 
 ## Takeaway
 

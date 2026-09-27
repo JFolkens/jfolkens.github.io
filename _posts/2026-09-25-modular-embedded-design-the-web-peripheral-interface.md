@@ -70,7 +70,7 @@ The parent constructor `PeripheralInterface` takes in the peripheral name (`gree
 
 ## Integrating Peripherals
 
-[`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/device_web_app.h) is a wrapper around a list of `PeripheralInterface` objects and an `HttpServer` instance. It renders the overall HTML page, provides the header, and calls the appropriate function for each registered peripheral. It also owns the `HttpServer` and registers the URI endpoints needed for the callbacks. This keeps endpoint and server logic away from the peripheral development process.
+[`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/device_web_app.h) is a wrapper around a list of `PeripheralInterface` objects and an `HttpServer` instance. It renders the overall HTML page, provides the header, and calls the appropriate function for each registered peripheral. It also owns the `HttpServer` and registers the URI endpoints needed for the callbacks. This keeps endpoint and server logic away from the peripheral development process.
 
 Once a class implements `PeripheralInterface`, adding additional instances is as straightforward as calling `device_web_app->add_peripheral(...)`.
 

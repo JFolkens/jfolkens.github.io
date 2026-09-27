@@ -7,17 +7,17 @@ tags: [esp32, cmake, assets, javascript, pwm, web]
 
 Rover is a tiny omni-wheel platform controlled via a small Http web server. The first iteration published a webserver whose content was created directly via C++ with `std::stringstream`. It was... something.
 
-![PwmWeb with stringstream embedded javascript](/assets/img/code/pwm_web_with_initial_javascript.png)
+![PwmWeb with stringstream embedded javascript](/assets/img/code/pwm_web_with_initial_javascript.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*The original PwmWeb class with in-line HTML/javascript code. The escape characters still haunt me*
 
-*The original PwmWeb class with in-line HTML/javascript code.*
-
-See [Modular Embedded Design: The Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}) for the architecture surrounding the `PwmWeb` class.
+(See [Modular Embedded Design: The Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}) for context on the `PwmWeb` class.)
 
 It worked, but it was hard to write, hard to read, and hard to keep clean as the project grew. `Stringstream` is no way to write javascript. Tracking the escape characters alone was frustrating and cumbersome.
 
-Now [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) uses an embedded asset file, and the JavaScript control script can be edited in a properly highlighted [`pwm_control.js`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/assets/pwm_control.js) file:
+Now [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/pwm_web.cpp) uses an embedded asset file, and the JavaScript control script can be edited in a properly highlighted [`pwm_control.js`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/assets/pwm_control.js) file:
 
-![PwmWeb with C++ text embeddings](/assets/img/code/pwm_web_with_embedded_javascript.png)
+![PwmWeb with C++ text embeddings](/assets/img/code/pwm_web_with_embedded_javascript.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*PwmWeb after moving Javascript into a separate file*
 
 It still isn't perfect (see [Next Steps](#next-steps)), but it is a significantly nicer way to develop new embedded server assets.
 
@@ -30,15 +30,15 @@ The basic idea is simple:
 - link the embedded data into the C++ program
 - keep the peripheral classes focused on behavior instead of page construction
 
-That sounds straightforward, but the implementation can get interesting.
+The trick was getting it to work.
 
-The ESP32 build system has its own rules for how embedded assets are handled, and I had to work through the details carefully. I also wanted the build to stay organized as new files were added, without forcing the high-level web code to know too much about the low-level embedding process.
+C++26 has native embedding of binary assets, but this would have meant upgrading my toolchain (if I do go that route, there will be a follow-on post). The ESP32 is a micro-controller; it doesn't have a file system. Files have to be packaged into the binary with their memory locations mapped as variables that C++ can understand.
 
 ## Adding assets to the ESP32 build
 
 The first step was getting the asset files into the build system.
 
-ESP-IDF has a parameter in `idf_component_register` for embedded text files (`EMBED_TXTFILES`). In [`main/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/CMakeLists.txt):
+ESP-IDF has a parameter in `idf_component_register` for embedded text files (`EMBED_TXTFILES`). In [`main/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/CMakeLists.txt):
 
 ```cmake
 # Gather all Javascript (*.js) and CSS (*.css) assets
@@ -59,9 +59,9 @@ idf_component_register(
 
 There is also `EMBED_FILES` for binary assets.
 
-Once the assets are embedded to the build, they can be linked using symbols made available through the ESP-IDF compilation process. The [Espressif docs](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/build-system.html) show an example of adding the binary data to source files via an `extern const uint8_t` declaration.
+Once the assets are embedded, they can be linked using symbols made available through the ESP-IDF compilation process. The [Espressif docs](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/build-system.html) show an example of adding the binary data to source files via an `extern const uint8_t` declaration.
 
-The docs also say to use the "full name of the file, as given in `EMBED_FILES`". This felt a little magick-y to me, but I hooked it all up. Linkage failed due to to the symbol not being found.
+The docs say to use the "full name of the file, as given in `EMBED_FILES`". This felt a little magick-y to me, but I hooked it all up. Linkage failed due to to the symbol not being found.
 
 I tried a few more magic symbol variations ("maybe if I leave of the _js extension?") before realizing that I'd have better luck cracking a password I set ten years ago.
 
@@ -84,34 +84,39 @@ To search the linked file for the asset symbols, run:
 `xtensa-esp32-elf-nm -C .\build\esp-idf\main\libmain.a | Select-String "binary"`
 
 
-![Embedded Link Names](/assets/img/code/discovering_symbol_names_with_nm.png)
+![Embedded Link Names](/assets/img/code/discovering_symbol_names_with_nm.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*Looking for my binary symbols by searching the compiled library file for the word "binary"*
 
 (This is a Windows PowerShell command; use `grep` on Linux)
 
-Sure enough, I was using the wrong symbols in my C++ source code. Specifically, the path in the CMakeLists.txt was not being used; only the file name. Instead of `_binary_web_assets_led_control_js_start`, I needed `_binary_led_control_js_start`.
+Sure enough, those were not any of the symbols I tried. Specifically, the path in the CMakeLists.txt was not being used; only the file name. Instead of `_binary_web_assets_led_control_js_start`, I needed `_binary_led_control_js_start`.
 
 ## Wrapping the binary assets
 Linked symbols worked once the right `extern` variables were declared. The last inconvenience was the coupling between the linked symbols and the higher level application code. Because the linked symbol names are specific to ESP32, they belong in the `main/esp32` folder (see the project architecture in [Local GTest Build for Rover]({% post_url 2026-09-25-local-gtest-build %})). But I don't want to update the code in `main/esp32` every time the web application adds an asset file.
 
-My solution was to use CMake magic. Since my `CMakeLists.txt` file already had a list of embedded asset files, I added a [helper script](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/cmake/GenerateAssetHeader.cmake) for embedding the symbols.
+One solution is to use CMake magic. Since my `CMakeLists.txt` file already had a list of embedded asset files, I added a [helper script](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/cmake/GenerateAssetHeader.cmake) for embedding the symbols.
 
-![Auto-generated Symbol Declarations](/assets/img/code/asset_auto_generated_header.png)
+![Auto-generated Symbol Declarations](/assets/img/code/asset_auto_generated_header.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*Auto-generated C++ code for declaring symbols linked asset files.*
 
-I turned clang formatting off for that file because my pre-commit hooks where adding newlines, which then got removed on every build. The old "who will win in a fight between my linter and my build system".
+Clang formatting is disabled for that file because my pre-commit hooks where adding newlines, which the build process then removed. The old "who will win in a fight between my linter and my compiler".
 
 Now a nice structure so I can retrieve asset locations by file name:
 
-![Auto-generated Assets List](/assets/img/code/asset_auto_generated_structs.png)
+![Auto-generated Assets List](/assets/img/code/asset_auto_generated_structs.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+*Auto-generated C++ code for a list of structs of linked assets.*
 
 Notice that the map uses file name only. Because the symbols are throwing away the path, file names must be unique. This is not an implementation detail; trying to "fix" this in the C++ code will result in incorrect symbol linkage.
 
 I prefer a very minimal code comment philosophy. My all-time favorite [best practices for writing code comments](https://stackoverflow.blog/2021/12/23/best-practices-for-writing-code-comments/) article starts with "comments should not duplicate code" and "good comments do not excuse unclear code". This "do-not-change-because-linkage-will-fail" is an excellent example of an absolutely necessary comment. Why? Because two years from now, I will go into this function, say "I want the key to depend on file paths, not just names", and I will break everything in hard-to-debug ways. If I was working with a team of developers? No chance.
 
-![Warning my future self against re-introducing bugs](/assets/img/code/asset_code_warning.png)
+![Warning my future self against re-introducing bugs](/assets/img/code/asset_code_warning.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*Strategically placed comments keep me from breaking things in the future.*
 
-Another big place for comments is in the [GenerateAssetHeader.cmake](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/cmake/GenerateAssetHeader.cmake) helper script. If Espressif ever brings their symbol names in line with the documentation, or if I ever fat-finger a file name, I need that `xtensa-esp32-elf-nm` command to sort things out. The best place to write it down? In the file I will go looking for when things break.
+Another great place for comments is in the CMake [helper script](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/cmake/GenerateAssetHeader.cmake) that auto-generates the header files. I probably won't remember the exact command for searching through a binary to print out the symbol names. If I upgrade the toolchain to one that uses the full file path, or if I ever fat-finger a file name, I need that `xtensa-esp32-elf-nm` command to sort things out. The best place to write it down? In the file I will go looking for when things break.
 
-![Putting useful commands in the source where I will see them](/assets/img/code/asset_cmake_helper_comments.png)
+![Putting useful commands in the source where I will see them](/assets/img/code/asset_cmake_helper_comments.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*Writing down useful commands in the place I will be when I need them.*
 
 And, in case it was not obvious, this blog post itself is my ultimate note-to-self on how all of this works. Writing reinforces learning and preserves knowledge. Don't lie to yourself about what you will remember two years from now - just write it down.
 
@@ -137,4 +142,9 @@ Moving browser-side code into embedded asset files made Rover’s web layer much
 
 It reduced the amount of awkward C++ string construction, made the JavaScript easier to work on directly, and gave me a more maintainable path for the ESP32 build.
 
-The next post will cover how embedded assets can be integrated with the unit test structure, which brings in a separate set of linking and build concerns.
+The next post *(coming soon)* will cover how embedded assets can be integrated with the unit test structure, which brings in a separate set of linking and build concerns.
+
+<br><br>
+
+This is the last post in the Rover series. Feel free to start over with {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
