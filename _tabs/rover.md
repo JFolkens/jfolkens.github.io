@@ -5,7 +5,7 @@ order: 3
 
 _The modular embedded development platform_
 
-![Rover](/assets/img/rover/rover_cropped.jpg){:width="50%": style="float: right; margin-left: 15px;"}
+![Rover](/assets/img/rover/rover_landscape.jpg){:width="50%": style="float: right; margin-left: 15px;"}
 
 Rover is an ESP-32 powered car controlled through a hosted web server.
 

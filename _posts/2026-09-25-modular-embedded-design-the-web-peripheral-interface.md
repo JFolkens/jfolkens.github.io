@@ -6,24 +6,48 @@ tags: [esp32, embedded, web, peripherals, architecture]
 ---
 
 
-One common issue with embedded development is testing incremental stages without leaving novels of commented out code lying around. Rover is designed to be iterated on; it is fundamentally a platform for adding and testing new embedded sensors/controls (and - let's be honest - it is also a really cool toy).
+## Overview
+Rover was designed to be tested incrementally; it is meant as a platform for adding and testing new embedded sensors/controls (and - let's be honest - it is a really cool toy).
 
-The web-peripheral interface means that new Peripheral types can be created with one class. Instead of re-architecting the web page, peripherals can be registered on one line and can be removed just as easily. Bringing up a new peripheral can be done in isolation, without remembering how the HttpServer actually works.
+![Rover - an embedded platform with omni wheels](/assets/img/rover/rover_dark.jpg){:style="width:50%; display: block; margin: 0 auto;"}
 
-This was especially useful for developing Rover's drivetrain as a composite peripheral - instead of testing the entire platform "all at once". The Drivetrain itself is composed of four Motor objects. Each Motor is actually a PWM with two direction GPIOs (gpio-forward and gpio-reverse). Rover began with a single PWM and two GPIOs. I sat on my couch and confirmed that I could move a single wheel forwards and backwards, at different speeds. Then I formed the Motor interface and confirmed that I could still move the wheel. Then I wrote Drivetrain as four wheels. I still have the PWM web interface as a class in my codebase - not an old branch on Github, but something I can quickly add back in.
+Rover's development interface is a locally hosted web server. The debug web server was created to be modular. Each peripheral has a section on the website that can be added or removed with a few lines of code.
 
+![The ESP32 Debug Web Server](/assets/img/web_server/webpage_motor_pwm_led.png){:style="width:50%; display:block; margin-left:auto; margin-right:auto"}
 
-![Rover on blocks stub](/assets/img/placeholder.jpg)
+To generated the web page above:
 
-*Stub: Picture of Rover on blocks so I can test the wheels without it running off*
+![Source code for ESP32 Debug Web Server](/assets/img/web_server/webpage_motor_pwm_led_code.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
 
-## Peripheral Interface
+To add a peripheral to the webpage,
 
-The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/device_web_app.h).
+- Instantiate the hardware object
+- Pass hardware to a "Web" wrapper class
+- Call `app->add_peripheral`
 
-![Motor webpage stub](/assets/img/placeholder.jpg)
+And that's it! Instead of re-architecting the web page, hardware changes can be made in a few lines of code. Bringing up new peripherals is done in isolation, without remembering how the web page design actually works.
 
-*Stub: image HTML page with multiple cards.*
+## The Power of a Modular Interface
+
+Rover's drivetrain is a composite peripheral:
+
+![Drivetrain composite class architecture](/assets/img/web_server/drivetrain_composite.png){:style="width:60%; display:block; margin-left:auto; margin-right:auto"}
+
+Waiting to test the hardware until the Drivetrain was complete would be a complete nightmare.
+
+Instead, I started by testing GPIOs (via LED). Then a single PWM. Then I sat on my couch and confirmed that a PWM and two GPIOs could move a single wheel.
+
+![Rover with wheel up in testing configuration](/assets/img/rover/early_debugging.jpg){:style="width:50%; display:block; margin-left:auto; margin-right:auto"}
+
+By the time I wrote the Motor controller class, I was highly confident in the underlying hardware.
+
+Because Rover uses omni wheels, going "forward" is done by setting [half of the wheels in reverse.](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/drivetrain/drivetrain_omni.cpp#L15) If that was the first time I tested the motors - oh boy.
+
+And, when I have any issues (say a motor wire snaps), I can quickly revert to a web page with lower-level controls. Instead of guessing why my tiny car is staggering, I can control the wheels individually and quickly isolate the issue.
+
+## Web Peripheral Interface: Implementation
+
+The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/device_web_app.h).
 
 That gives the page a simple, modular feel:
 
@@ -32,12 +56,14 @@ That gives the page a simple, modular feel:
 - peripherals can be added or removed without redesigning the whole site
 - the UI stays useful while the hardware is still in flux
 
-The content of each card is defined by the [`PeripheralInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/peripheral_interface.h) class. The [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/led_web.cpp) class has a button that toggles between **Turn ON** and **Turn OFF**. [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) is a slider from 0 to 100 percent duty cycle.
+The content of each card is defined by the [`PeripheralInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/peripheral_interface.h) class.
 
-Each new `PeripheralInterface` class must define:
+To be a `PeripheralInterface`, you must define:
 - The visual HTML representation (state and controls)
 - Hooks for updating hardware (controls)
 - A hardware update function
+
+The [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/led_web.cpp) class has a button that toggles between **Turn ON** and **Turn OFF**. [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) is a slider from 0 to 100 percent duty cycle.
 
 The parent constructor `PeripheralInterface` takes in the peripheral name (`green_led`, `front_left_wheel`, etc), and typically an ownership reference to the underlying hardware module (`PwmInterface`, `GpioInterface`, etc).
 
