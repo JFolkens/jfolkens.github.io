@@ -1,5 +1,5 @@
 ---
-title: Local GTest Build for Rover
+title: Unit Testing an Embedded Platform
 date: 2026-09-25 10:00:00 -0500
 categories: [Rover, Testing]
 tags: [gtest, cmake, embedded, esp32, pre-commit]
@@ -29,7 +29,7 @@ For example, each PWM should be able to `set_speed`, `get_speed`, and `turn_off`
 
 Finally, there is the `tests` folder. Note that while ESP32 libraries can not be compiled locally, the test code likewise can not be compiled on-target (and absolutely does not belong on an embedded device, where flash size is constrained).
 
-![Unit test architecture stub](/assets/img/rover/placeholder.jpg)
+![Unit test architecture stub](/assets/img/placeholder.jpg)
 
 *Stub: architecture diagram showing host-side unit tests, the HAL layer, and the ESP32-specific implementation layer.*
 
@@ -61,7 +61,7 @@ What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug
 
 The script `run_unit_tests.bat` runs the resulting test executeable.
 
-![Local test runner stub](/assets/img/rover/placeholder.jpg)
+![Local test runner stub](/assets/img/placeholder.jpg)
 
 *Stub: screenshot of the unit test script and test output in a terminal window.*
 
@@ -71,13 +71,13 @@ The final piece is integrating unit tests with pre-commit hooks. Unit tests are 
 
 Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
 
-![Pre-commit yaml stub](/assets/img/rover/placeholder.jpg)
+![Pre-commit yaml stub](/assets/img/placeholder.jpg)
 
 *Stub: Picture of pre-commit-config.yaml*
 
 Python projects can use `pip install pre-commit` to access the handy CLI `pre-commit` command. I don't feel like putting `pre-commit` in my base environment or creating a Rover python venv, so when I want to run pre-commit checks without commiting I use `.git/hooks/pre-commit`. Or, the `run_unit_tests.bat` script.
 
-![Pre-commit hook stub](/assets/img/rover/placeholder.jpg)
+![Pre-commit hook stub](/assets/img/placeholder.jpg)
 
 *Stub: Picture of running pre-commit command*
 

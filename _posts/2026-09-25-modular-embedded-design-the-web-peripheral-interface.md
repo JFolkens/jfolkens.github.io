@@ -13,7 +13,7 @@ The web-peripheral interface means that new Peripheral types can be created with
 This was especially useful for developing Rover's drivetrain as a composite peripheral - instead of testing the entire platform "all at once". The Drivetrain itself is composed of four Motor objects. Each Motor is actually a PWM with two direction GPIOs (gpio-forward and gpio-reverse). Rover began with a single PWM and two GPIOs. I sat on my couch and confirmed that I could move a single wheel forwards and backwards, at different speeds. Then I formed the Motor interface and confirmed that I could still move the wheel. Then I wrote Drivetrain as four wheels. I still have the PWM web interface as a class in my codebase - not an old branch on Github, but something I can quickly add back in.
 
 
-![Rover on blocks stub](/assets/img/rover/placeholder.jpg)
+![Rover on blocks stub](/assets/img/placeholder.jpg)
 
 *Stub: Picture of Rover on blocks so I can test the wheels without it running off*
 
@@ -21,7 +21,7 @@ This was especially useful for developing Rover's drivetrain as a composite peri
 
 The web UI is organized around **cards**. In practice, each peripheral gets its own section of the page, shown as a card in the HTML. These cards appear from top to bottom in the same order that peripherals are added to [`DeviceWebApp`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/device_web_app.h).
 
-![Motor webpage stub](/assets/img/rover/placeholder.jpg)
+![Motor webpage stub](/assets/img/placeholder.jpg)
 
 *Stub: image HTML page with multiple cards.*
 
@@ -68,11 +68,11 @@ class PeripheralInterface {
 };
 ```
 
-![LED on/off stub](/assets/img/rover/placeholder.jpg)
+![LED on/off stub](/assets/img/placeholder.jpg)
 
 *Stub: image showing an LED turning on and off through the web interface.*
 
-![Rover peripheral cards page stub](/assets/img/rover/placeholder.jpg)
+![Rover peripheral cards page stub](/assets/img/placeholder.jpg)
 
 
 *Stub: screenshot of the Rover webpage showing multiple peripheral cards rendered top to bottom, including one or more debug-oriented cards.*

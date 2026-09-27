@@ -7,7 +7,7 @@ tags: [esp32, cmake, assets, javascript, pwm, web]
 
 Rover is a tiny omni-wheel platform controlled via a small Http web server. The first iteration published a webserver whose content was created directly via C++ with `std::stringstream`. It was... something.
 
-![PwmWeb with stringstream embedded javascript](/assets/img/rover/pwm_web_with_initial_javascript.png)
+![PwmWeb with stringstream embedded javascript](/assets/img/code/pwm_web_with_initial_javascript.png)
 
 *The original PwmWeb class with in-line HTML/javascript code.*
 
@@ -17,7 +17,7 @@ It worked, but it was hard to write, hard to read, and hard to keep clean as the
 
 Now [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/peripherals/pwm_web.cpp) uses an embedded asset file, and the JavaScript control script can be edited in a properly highlighted [`pwm_control.js`](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/web/assets/pwm_control.js) file:
 
-![PwmWeb with C++ text embeddings](/assets/img/rover/pwm_web_with_embedded_javascript.png)
+![PwmWeb with C++ text embeddings](/assets/img/code/pwm_web_with_embedded_javascript.png)
 
 It still isn't perfect (see [Next Steps](#next-steps)), but it is a significantly nicer way to develop new embedded server assets.
 
@@ -84,7 +84,7 @@ To search the linked file for the asset symbols, run:
 `xtensa-esp32-elf-nm -C .\build\esp-idf\main\libmain.a | Select-String "binary"`
 
 
-![Embedded Link Names](/assets/img/rover/discovering_symbol_names_with_nm.png)
+![Embedded Link Names](/assets/img/code/discovering_symbol_names_with_nm.png)
 
 (This is a Windows PowerShell command; use `grep` on Linux)
 
@@ -95,23 +95,23 @@ Linked symbols worked once the right `extern` variables were declared. The last 
 
 My solution was to use CMake magic. Since my `CMakeLists.txt` file already had a list of embedded asset files, I added a [helper script](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/cmake/GenerateAssetHeader.cmake) for embedding the symbols.
 
-![Auto-generated Symbol Declarations](/assets/img/rover/asset_auto_generated_header.png)
+![Auto-generated Symbol Declarations](/assets/img/code/asset_auto_generated_header.png)
 
 I turned clang formatting off for that file because my pre-commit hooks where adding newlines, which then got removed on every build. The old "who will win in a fight between my linter and my build system".
 
 Now a nice structure so I can retrieve asset locations by file name:
 
-![Auto-generated Assets List](/assets/img/rover/asset_auto_generated_structs.png)
+![Auto-generated Assets List](/assets/img/code/asset_auto_generated_structs.png)
 
 Notice that the map uses file name only. Because the symbols are throwing away the path, file names must be unique. This is not an implementation detail; trying to "fix" this in the C++ code will result in incorrect symbol linkage.
 
 I prefer a very minimal code comment philosophy. My all-time favorite [best practices for writing code comments](https://stackoverflow.blog/2021/12/23/best-practices-for-writing-code-comments/) article starts with "comments should not duplicate code" and "good comments do not excuse unclear code". This "do-not-change-because-linkage-will-fail" is an excellent example of an absolutely necessary comment. Why? Because two years from now, I will go into this function, say "I want the key to depend on file paths, not just names", and I will break everything in hard-to-debug ways. If I was working with a team of developers? No chance.
 
-![Warning my future self against re-introducing bugs](/assets/img/rover/asset_code_warning.png)
+![Warning my future self against re-introducing bugs](/assets/img/code/asset_code_warning.png)
 
 Another big place for comments is in the [GenerateAssetHeader.cmake](https://github.com/JFolkens/esp32_peripheral_debug/blob/main/main/cmake/GenerateAssetHeader.cmake) helper script. If Espressif ever brings their symbol names in line with the documentation, or if I ever fat-finger a file name, I need that `xtensa-esp32-elf-nm` command to sort things out. The best place to write it down? In the file I will go looking for when things break.
 
-![Putting useful commands in the source where I will see them](/assets/img/rover/asset_cmake_helper_comments.png)
+![Putting useful commands in the source where I will see them](/assets/img/code/asset_cmake_helper_comments.png)
 
 And, in case it was not obvious, this blog post itself is my ultimate note-to-self on how all of this works. Writing reinforces learning and preserves knowledge. Don't lie to yourself about what you will remember two years from now - just write it down.
 
