@@ -1,6 +1,7 @@
 ---
 icon: fas fa-car
 order: 3
+permalink: /
 ---
 
 ![Rover](/assets/img/rover/rover_landscape.jpg){:style="width:50%; display:block; margin-left:auto; margin-right:auto"}

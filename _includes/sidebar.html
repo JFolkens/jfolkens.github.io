@@ -17,12 +17,15 @@
 
   <nav class="sidebar-nav flex-column flex-grow-1 w-100 ps-0">
     <ul class="nav primary-nav">
+      <!-- For now, Rover is home. Uncomment the "Home" page once there are multiple projects -->
+      <!--
       <li class="nav-item{% if page.layout == 'home' %} active{% endif %}">
         <a href="{{ '/' | relative_url }}" class="nav-link">
           <i class="fa-fw fas fa-home"></i>
           <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
         </a>
       </li>
+      -->
 
       {% for tab in site.tabs %}
         {% unless tab.nav_group == 'secondary' %}

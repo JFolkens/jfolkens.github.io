@@ -30,9 +30,6 @@ For example, each PWM should be able to `set_speed`, `get_speed`, and `turn_off`
 
 Finally, there is the `tests` folder. Note that while ESP32 libraries can not be compiled locally, the test code likewise can not be compiled on-target (and absolutely does not belong on an embedded device, where flash size is constrained).
 
-![Unit test architecture stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
-*Placeholder: architecture diagram showing host-side unit tests, the HAL layer, and the ESP32-specific implementation layer.*
-
 The next section shows the magic of compiling the right code into the right places at the right time.
 
 ## Adding Unit Tests to an ESP32 project
@@ -63,24 +60,17 @@ What [`tests/CMakeLists.txt`](https://github.com/JFolkens/esp32_peripheral_debug
 
 The script `run_unit_tests.bat` runs the resulting test executeable.
 
-![Local test runner stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
-*Stub: screenshot of the unit test script and test output in a terminal window.*
+![Local test runner - first build installs dependencies](/assets/img/build_logs/run_unit_tests_first_build.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+*First invocation of test script is slow because it installs GoogleTest dependencies.*
 
-## Pre-commit Integration
+![Local test runner - second build uses cached dependencies](/assets/img/build_logs/run_unit_tests_second_build.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+*Second invocation uses cached dependencies.*
 
-The final piece is integrating unit tests with pre-commit hooks. Unit tests are only useful if they are run regularly; otherwise they aren't checking anything. Some projects integrate CI/CD into git or Jenkins pipelines. For small projects, I find it easiest to simply prevent myself from commiting code that fails.
+![Local test runner - unit tests pass](/assets/img/build_logs/unit_tests_pass.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*Unit tests showing all green.*
 
-Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
 
-![Pre-commit yaml stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
-*Stub: Picture of pre-commit-config.yaml*
-
-Python projects can use `pip install pre-commit` to access the handy CLI `pre-commit` command. I don't feel like putting `pre-commit` in my base environment or creating a Rover python venv, so when I want to run pre-commit checks without commiting I use `.git/hooks/pre-commit`. Or, the `run_unit_tests.bat` script.
-
-![Pre-commit hook stub](/assets/img/placeholder.jpg){:style="width:20%; display:block; margin-left:auto; margin-right:auto"}
-*Stub: Picture of running pre-commit command*
-
-## Example: `HttpServerInterface`
+## Example Unit Test: `HttpServerInterface`
 
 `HttpServer` is a hardware device with non-trivial logic and testing.
 
@@ -103,6 +93,40 @@ rover/
 [`HttpServerInterface`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/hal/http_server/http_server_interface.h) covers the routing logic and the helper functions for parsing key-value pairs from URI requests. String parsing and callback logic should be unit tested because it is bug-prone and does not require ESP32 hardware to validate.
 
 [`HttpServerESP32`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/esp32/http_server_esp32.h) contains the code needed to implement `HttpServerInterface` on an actual ESP32 device. These function calls can not be tested locally (atleast, not easily - high-end chips tend to ship with simulators, but the $20 ESP32 has no lead time and why simulate when you can just buy one).
+
+## Pre-commit Integration
+The final piece is integrating unit tests with pre-commit hooks. Unit tests are only useful if they are run regularly; otherwise they aren't checking anything. Some projects integrate CI/CD into git or Jenkins pipelines. For small projects, I find it easiest to simply prevent myself from commiting code that fails.
+
+Both a clang formatter and the unit test executeable are wired into [`.pre-commit-config.yaml`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/.pre-commit-config.yaml). I am a lazy person; if it is hard to push code that is unformatted and untested, I tend to do more formatting and testing.
+
+```yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+      - id: trailing-whitespace
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        args: ["-style=file:.clang-format"]
+        types_or: [c++, c]
+
+  - repo: local
+    hooks:
+      - id: run-unit-tests
+        name: Build and Run C++ Unit Tests
+        entry: 'cmd.exe /c .\\tests\\run_unit_tests.bat'
+        language: system
+        pass_filenames: false
+```
+
+Python projects can use `pip install pre-commit` to access the handy CLI `pre-commit` command. I don't feel like putting `pre-commit` in my base environment or creating a Rover python venv, so when I want to run pre-commit checks without commiting I use `.git/hooks/pre-commit`. Or, the `run_unit_tests.bat` script.
+
+![Pre-commit hook stub](/assets/img/build_logs/git_pre-commit_failed.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+*Using git pre-commit to avoid commiting un-formatted code.*
 
 ## Takeaway
 
