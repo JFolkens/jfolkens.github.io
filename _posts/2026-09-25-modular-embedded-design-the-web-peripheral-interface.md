@@ -14,10 +14,12 @@ Rover was designed to be tested incrementally; it is meant as a platform for add
 Rover's development interface is a locally hosted web server. The debug web server was created to be modular. Each peripheral has a section on the website that can be added or removed with a few lines of code.
 
 ![The ESP32 Debug Web Server](/assets/img/web_server/webpage_motor_pwm_led.png){:style="width:50%; display:block; margin-left:auto; margin-right:auto"}
+*Rover hardware control via web server. Each peripheral is given a section from top to bottom.*
 
-To generated the web page above:
+The modular structure of the code keeps the main function short and readable:
 
-![Source code for ESP32 Debug Web Server](/assets/img/web_server/webpage_motor_pwm_led_code.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+![Source code for ESP32 Debug Web Server](/assets/img/web_server/webpage_motor_pwm_led_code.png){:style="width:95%; display:block; margin-left:auto; margin-right:auto"}
+*app_main() for generating the web page above.*
 
 To add a peripheral to the webpage,
 
@@ -54,19 +56,35 @@ To be a peripheral, you must extend the [`PeripheralInterface`](https://github.c
 - Hooks for updating hardware (controls)
 - A hardware update function
 
+`LedWeb` is an example of a class that extends `PeripheralInterface`.
+
 ![LedWeb Interface](/assets/img/web_server/led_web_interface.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
 *LedWeb implements the PeripheralInterface*
 
-`LedWeb` is an example of a class that extens `PeripheralInterface`.
+The [`html_control`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/led_web.cpp#L25) function returns a section of `html` for controlling the LED. For an LED, `html_control` returns a button.
 
+The control is also responsible for triggering a URI endpoint when the user interacts with the webpage (see [Next Steps](#next-steps) for how this can be scaled and improved). The URI endpoint must follow a certain format that makes it parseable by the server interface.
 
+The server then feeds those callbacks back to the Peripheral object via the `handle_update` function. For [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/led_web.cpp#L44), an update is one of two things: Turn ON, or Turn OFF.
 
+```cpp
+void LedWeb::handle_update(const std::map<std::string, std::string> &parameters)
+{
+    const auto action_it = parameters.find("action");
+    if (action_it == parameters.end())
+        return;
+    const std::string &cmd = action_it->second;
+    if (cmd == "on") {
+        led->set(true);
+    } else if (cmd == "off") {
+        led->set(false);
+    } else {
+        rover::hal::log_error("LedWeb", "Unknown command: %s", cmd);
+    }
+}
+```
 
-
-
-For example, [`LedWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/led_web.h) has a button that toggles between **Turn ON** and **Turn OFF**.
-
-The parent constructor `PeripheralInterface` takes in the peripheral name (`green_led`, `front_left_wheel`, etc), and typically an ownership reference to the underlying hardware module (`PwmInterface`, `GpioInterface`, etc).
+The constructor for `LedWeb` takes in the peripheral name (which is passed to the parent constructor), and an ownership reference to the underlying hardware module - in this case, `GpioInterface`. `LedWeb` should - but currently does not - verify that the `gpio` uses `GpioDirection::OUTPUT`. Or there could be an additional wrapper in the `hal` layer for exposing a GPIO as an LED (implemented as an output-only GPIO).
 
 ## Integrating Peripherals
 

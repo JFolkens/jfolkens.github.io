@@ -12,12 +12,17 @@ Rover is a tiny omni-wheel platform controlled via a small Http web server. The 
 
 (See [Modular Embedded Design: The Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}) for context on the `PwmWeb` class.)
 
-It worked, but it was hard to write, hard to read, and hard to keep clean as the project grew. `Stringstream` is no way to write javascript. Tracking the escape characters alone was frustrating and cumbersome.
+It worked, but it was hard to write, hard to read, and hard to keep clean as the project grew. `Stringstream` is no way to write JavaScript. Tracking the escape characters alone was frustrating and cumbersome. There was no linting or syntax highlighting.
 
 Now [`PwmWeb`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/peripherals/pwm_web.cpp) uses an embedded asset file, and the JavaScript control script can be edited in a properly highlighted [`pwm_control.js`](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web/assets/pwm_control.js) file:
 
 ![PwmWeb with C++ text embeddings](/assets/img/code/pwm_web_with_embedded_javascript.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
 *PwmWeb after moving Javascript into a separate file*
+
+Notice how several dozen lines of escaped JavaScript were replaced with a single call to `rover::hal::get_text_asset`. The text asset is retrieved using the file location `web/assets/pwm_control.js`.
+
+![PwmWeb embedded JavaScript file](/assets/img/code/pwm_web_asset_file.png){:style="width:80%; display:block; margin-left:auto; margin-right:auto"}
+*JavaScript file for PwmWeb. The `.js` file is an embedded asset for the C++ code.*
 
 It still isn't perfect (see [Next Steps](#next-steps)), but it is a significantly nicer way to develop new embedded server assets.
 
@@ -69,7 +74,8 @@ I tried a few more magic symbol variations ("maybe if I leave of the _js extensi
 
 First, I used CMake commands to print out the exact value of my `${ASSET_FILES}`. This told me that CMakeLists was finding my files, and the paths looked as I expected.
 
-* Stub: Picture of printing ${ASSET_FILES} in CMakeLists and seeing outputs *
+![CMake output showing ASSET_FILES](/assets/img/build_logs/assets_cmake.png){:style="width:95%; display:block; margin-left:auto; margin-right:auto"}
+*CMake debug statements confirm the compiler is locating asset files.*
 
 The next question is how those assets appear as symbols in the linking stage. This was done by inspecting the linked binary to see what symbols were really present.
 
@@ -146,5 +152,5 @@ The next post *(coming soon)* will cover how embedded assets can be integrated w
 
 <br><br>
 
-This is the last post in the Rover series. Feel free to start over with {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
+This is currently the last post in the Rover series. Feel free to start over with {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
 <a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
