@@ -11,27 +11,27 @@ Unit testing is important and is particularly difficult on embedded platforms. T
 | --- | --- | --- |
 | **Execution Environment** | Microcontroller | Computer |
 | **Toolchain** | Target-specific | Native (GCC, Clang, MSVC) |
+| **Hardware Required** | Yes | No |
 | **Hardware Coupling** | High | Low |
 | **Portability** | Low | High |
 | **Automation** | Low | High |
 
-Off-target tests can be developed before hardware is in hand, and are useful for testing complex pieces of non-embedded logic. On-target tests require a second binary to be flashed to your device; they are less convenient and so tend to be run less often. But on-target tests catch actual hardware and low-level library bugs. For an in-depth discussion of embedded testing, see James W. Grenning's book on [Test-Driven Development for Embedded C](https://www.amazon.com/dp/193435662X?lv=shuf&channelId=500&plpRedirect=mhFallback).
+Off-target tests are useful for testing complex pieces of non-embedded logic. On-target tests require a second binary to be flashed to your device; they are less convenient and so tend to be run less often, but are the only option for exposing low-level or hardware bugs. For an in-depth discussion of embedded testing, see James W. Grenning's book on [Test-Driven Development for Embedded C](https://www.amazon.com/dp/193435662X?lv=shuf&channelId=500&plpRedirect=mhFallback).
 
 Rover uses the {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
 <a href="{{ my_post.url | relative_url }}">Web-Peripheral Interface</a> for on-target testing and debugging of new hardware. This post covers off-target unit testing via the GoogleTest framework.
 
 ## Writing Embedded Code That Can Be Tested
 
-The key to off-target tests is to isolate embedded code from higher-level logic. This requires constant vigilance; hardware modules want to be written with their algorithmic buddies, and they must be pulled apart at every turn.
+The key to off-target tests is to isolate embedded code from higher-level logic.
 
-For compilation reasons, Rover splits this into two folders:
+For compilation reasons, Rover separates code into different folders:
 
-- [`main/hal`](https://github.com/JFolkens/esp32_peripheral_debug/tree/main/main/hal) - the Hardware Abstraction Layer which defines hardware behavior that is consistent across target platforms
-- [`main/esp32`](https://github.com/JFolkens/esp32_peripheral_debug/tree/main/main/esp32) - any actual ESP32 library calls
+- [`main/hal`](https://github.com/JFolkens/esp32_peripheral_debug/tree/rover_v1/main/hal) - (Hardware Abstraction Layer) Cross-platform interface definitions
+- [`main/esp32`](https://github.com/JFolkens/esp32_peripheral_debug/tree/rover_v1/main/esp32) - ESP32 library calls
+- [`tests`](https://github.com/JFolkens/esp32_peripheral_debug/tree/rover_v1/tests) - Native unit tests
 
-For example, each PWM should be able to `set_speed`, `get_speed`, and `turn_off`; this definition belongs in the HAL. PWM controls do not have sensors, so `get_speed` is based on the last call to `set_speed`. This logic can be tested. What you can not do is control an ESP32 PWM port without calling the ESP32 libraries - that code belongs in `main/esp32` and can not be tested off-target. The section below on `HttpServer` demonstrates a less-trivial separation of concerns.
-
-Finally, there is the `tests` folder. Note that while ESP32 libraries can not be compiled locally, the test code likewise can not be compiled on-target (and absolutely does not belong on an embedded device, where flash size is constrained).
+The HAL contains interfaces that are testable off-target. The ESP32 folder can not be compiled natively; the tests folder can not be compiled on-target.
 
 The next section shows the magic of compiling the right code into the right places at the right time.
 
