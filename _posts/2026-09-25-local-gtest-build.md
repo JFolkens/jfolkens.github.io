@@ -7,15 +7,18 @@ tags: [gtest, cmake, embedded, esp32, pre-commit]
 
 Unit testing is important and is particularly difficult on embedded platforms. There are two flavors of embedded tests:
 
-- **On-target**, where the tests run on the microcontroller itself
-- **Off-target**, where the tests run locally on a host machine
+| | On-target | Off-target |
+| --- | --- | --- |
+| **Execution Environment** | Microcontroller | Computer |
+| **Toolchain** | Target-specific | Native (GCC, Clang, MSVC) |
+| **Hardware Coupling** | High | Low |
+| **Portability** | Low | High |
+| **Automation** | Low | High |
 
-An on-target test is one that is compiled and run on the embedded platform proper. These tests will catch implementation bugs that off-target tests can not. However, they are tightly coupled with hardware. If your hardware engineer is still spinning up a project board, the embedded software developers could spend months twiddling their thumbs. Depending on the test, on-target testing can be susceptible to hardware bugs, especially for early revisions.
+Off-target tests can be developed before hardware is in hand, and are useful for testing complex pieces of non-embedded logic. On-target tests require a second binary to be flashed to your device; they are less convenient and so tend to be run less often. But on-target tests catch actual hardware and low-level library bugs. For an in-depth discussion of embedded testing, see James W. Grenning's book on [Test-Driven Development for Embedded C](https://www.amazon.com/dp/193435662X?lv=shuf&channelId=500&plpRedirect=mhFallback).
 
-Off-target tests are tests that compile and run locally on a non-embedded computer. They will miss bugs specific to the embedded libraries. However, they force you to isolate the truly embedded code from higher level logic. This makes code more easily portable to different target platforms. I have also found that off-target tests tend to be run more often; the Rover unit tests are part of the pre-commit pipeline, so I can not avoid running them regularly.
-
-Both on and off-target tests are important. For an example of on-target debugging, see {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
-<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>. This post covers off-target tests using the GoogleTest framework.
+Rover uses the {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
+<a href="{{ my_post.url | relative_url }}">Web-Peripheral Interface</a> for on-target testing and debugging of new hardware. This post covers off-target unit testing via the GoogleTest framework.
 
 ## Writing Embedded Code That Can Be Tested
 
