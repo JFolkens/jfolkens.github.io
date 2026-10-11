@@ -60,117 +60,55 @@ Notice how the micro-usb for the ESP32 is hanging off the edge of the frame. Thi
 
 Here is a full wiring diagram:
 
-![Rover battery, power rails, motor drivers, and 5 V buck converter](/assets/img/diagrams/rover_power.png)
+![Rover battery, power rails, motor drivers, and 5 V buck converter](/assets/img/diagrams/rover_power.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
 *Power distribution for the motor drivers and ESP32 DevKit V1.*
 
 
+## Software and control
 
+The first iteration of Rover is controlled via Web server interface:
 
+![Web server interface](/assets/img/web_server/webpage.png){:style="width:90%; display:block; margin-left:auto; margin-right:auto"}
+*Rover webpage.*
 
-<!-- TODO: Clean up this section, this is a rough draft that AI wrote from my prompt -->
-<!-- 
+The webpage is designed to be [modular]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}) and easily re-configurable. My next iteration of Rover will be controlled via Bluetooth with an actual PS4 controller.
 
+The firmware targets the ESP32 DevKit V1 and was built with ESP-IDF v6.0.2. Setup using the VS Code ESP-IDF extension is described on the
+[project README](https://github.com/JFolkens/esp32_peripheral_debug). Rover connects to your local Wi-fi and instructions for providing Wi-fi name and password (not included) are described in [source code comments](https://github.com/JFolkens/esp32_peripheral_debug/blob/rover_v1/main/web_server.cpp#L34).
 
-## Software and control path
+The [Rover codebase](https://github.com/JFolkens/esp32_peripheral_debug/tree/rover_v1) is publicly available on Github, and the rest of the posts on this webpage cover the software design and architecture for the platform.
 
-The control path runs from the browser to the motors:
+## Rover in action
 
-```text
-Browser controls
-    -> HTTP request over the local Wi-Fi network
-    -> ESP-IDF HTTP server and DeviceWebApp
-    -> web peripheral wrapper
-    -> DrivetrainOmni
-    -> motor interfaces and ESP32 GPIO/PWM implementation
-    -> L298N boards
-    -> motors
-```
+<div style="display: grid; grid-template-columns: 80%; justify-content: center; padding-bottom: 20px;">
+  <video width="60%" controls muted playsinline>
+    <source src="/assets/img/rover/rover_video_cropped.mp4" type="video/mp4">
+    Your browser does not support embedded video.
+  </video>
+</div>
 
-`app_main()` creates the ESP32 GPIO and motor objects, combines the four motors
-in `DrivetrainOmni`, and registers the web-facing peripherals with
-`DeviceWebApp`. The web application and hardware interfaces keep page and
-request handling separate from the low-level ESP32 implementation. That
-separation also lets selected logic be built and tested on a desktop with
-mocked hardware interfaces.
+## Future design spirals
 
-The drivetrain accepts x translation, y translation, and clockwise rotation
-commands. It mixes those components into one command for each wheel, then
-scales the outputs if needed to keep them within the supported range. The
-commands are normalized requests, not measurements of wheel speed. Rover does
-not currently have encoders, so it cannot report actual wheel speed or
-position.
+Rover is current v1: a basic platform with known limitations. Future design spirals will address the following:
 
-The control page is available at `http://192.168.1.10` on my local network. The
-server uses plain HTTP and has no application-level authentication, so this is
-a development interface for a trusted local network, not a hardened remote
-control system.
+- Rover's drivetrain is currently open loop because I have not yet purchased and installed wheel encoders. This gives the platform a bit of a stagger since the motors and wheels are operating at slightly different strengths.
 
-## What I have tested
+- The motor control logic is basic - "speed" is raw PWM duty cycle. With the 8V batteries, the PWM has to hit 70% before the wheels move. Once encoders are installed, I can implement an actual PID control algorithm.
 
-I brought the hardware up incrementally: first GPIO and the onboard LED, then
-PWM, then a single motor, and finally the complete drivetrain. This let me
-check smaller pieces before trying to debug the four-wheel mechanism as a
-whole.
+- Rover is not Wi-fi drop safe. That is, if my Wi-fi goes down, it will continue on its current path until I can catch it. Adding and testing a connection-loss behavior would be more "safe" (for my shins).
 
-With the web controls, I have confirmed movement in both x directions, both y
-directions, and both rotation directions. Here is a short video of Rover in
-motion:
+- Rover v2 will be controlled with a PS4 controller over Bluetooth.
 
-<video width="100%" controls muted playsinline>
-  <source src="/assets/img/rover/rover_video_cropped.mp4" type="video/mp4">
-  Your browser does not support embedded video.
-</video>
+- Custom PCB with simplified / fewer motor control pins. Currently there are `4 x 3 = 12` GPIO pins used for motor control (not including encoders). This can be reduced to `(4 x 2 + 1) = 9` pins by using an inverter to set `Forward = !Reverse`. Then each motor is controlled by `{Direction | Speed}`. The additional pin is a braking pin; setting `Forward = Reverse` is a hard brake for the L298N controllers. A single `Stop` GPIO can be distributed to all four wheels (no wheelies, but very efficient).
 
-The repository also has host-side GoogleTest coverage for selected logic.
-Those tests help check software behavior without the physical rover, but they
-do not validate the wiring, motor drivers, or how the chassis moves. The
-[unit-testing post]({% post_url 2026-09-25-local-gtest-build %}) describes the
-scope and setup in more detail.
+## Rover posts
 
-## Limitations and next steps
+See additional topics on Rover design, testing, and implementation:
 
-There are two important limitations in the current control system. First, the
-motor commands are open loop because there are no wheel encoders. Second, the
-motors do not begin moving until the command is around 70% in my current setup.
-The mapping from command to PWM is linear, so low-speed control is poor. That
-threshold is an observation from this build, not a calibrated value for all
-conditions; motor variation, load, battery voltage, and driver losses may all
-affect it.
+- {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
+- {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-local-gtest-build.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
+- {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-binary-assets-on-esp32.md" | first %}
+<a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
 
-There is also no communication-loss stop. If Wi-Fi drops, the motors keep
-running at their last commanded state. Adding and testing a command timeout
-and stop behavior is a priority before extending the remote-control options.
-
-After I finish setting up the project website, the next stage is to investigate
-driving Rover with a PS4 controller over Bluetooth. Other ideas include tuning
-the motor response, adding wheel encoders, and designing a custom PCB to
-replace some of the perfboard wiring.
-
-The PCB idea includes simplifying motor direction signals. Today each of the
-four motors uses Forward, Reverse, and PWM signals, for 12 ESP32 outputs. One
-direction output per motor plus inverter/gating logic to generate the driver
-inputs, four PWM outputs, and one shared brake signal would use 9 outputs, a
-net reduction of 3. The shared brake would affect all four motors, and its
-logic would need to keep the L298N enable and direction inputs in the intended
-states. This is only a design idea; I have not built or tested that circuit.
-
-Longer term, I would like the project structure to make it easier to adapt the
-software to a smaller, lower-cost microcontroller. The current hardware
-implementations are specific to the ESP32, so that would still require a new
-target implementation and testing on the new hardware. The interface
-boundaries are a starting point for that work, not a claim that Rover is
-already portable.
-
-## Build information
-
-The firmware targets the ESP32 DevKit V1 and was built with ESP-IDF v6.0.2.
-Install the matching ESP-IDF tools, open the `web_server` project, select the
-`esp32` target, and use the ESP-IDF build/flash workflow described in the
-[project README](https://github.com/JFolkens/esp32_peripheral_debug). The
-firmware connects to a Wi-Fi access point in station mode; configure the SSID
-and provide the local password override described in `web_server/main/web_server.cpp`.
-Keep real credentials out of source control.
-
-For more detail, continue with the [Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}),
-[Unit Testing an Embedded Platform]({% post_url 2026-09-25-local-gtest-build %}),
-and [Binary Assets on ESP32]({% post_url 2026-09-25-binary-assets-on-esp32 %}) posts. -->
