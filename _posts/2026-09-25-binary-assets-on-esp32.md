@@ -37,7 +37,7 @@ The basic idea is simple:
 
 The trick was getting it to work.
 
-C++26 has native embedding of binary assets, but this would have meant upgrading my toolchain (if I do go that route, there will be a follow-on post). The ESP32 is a micro-controller; it doesn't have a file system. Files have to be packaged into the binary with their memory locations mapped as variables that C++ can understand.
+C++26 has native embedding of binary assets, but this would have meant upgrading my toolchain (if I do go that route, there will be a follow-on post). While the ESP32 microcontroller can support small filesystems, this project instead uses embedded assets. Files are packaged into the binary with their memory locations mapped as variables that C++ can understand.
 
 ## Adding assets to the ESP32 build
 

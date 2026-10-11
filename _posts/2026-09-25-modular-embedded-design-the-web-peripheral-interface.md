@@ -92,7 +92,7 @@ The constructor for `LedWeb` takes in the peripheral name (which is passed to th
 
 Once a class implements `PeripheralInterface`, adding additional instances is as straightforward as calling `device_web_app->add_peripheral(...)`.
 
-`HttpServer` includes code for parsing URI endpoing key-value pairs. Each Peripheral has a `name`. Update endpoints are of the format `/name/update?key=value&key2=value2`. When `HttpServer` receives a request, it parses the path and key-value parameters and then hands control off to `DeviceWebApp`. Then `DeviceWebApp` does a lookup of peripherals by their name, and calls `peripheral->handle_update()` with a map of parameters.
+`HttpServer` includes code for parsing URI endpoing key-value pairs. Each Peripheral has a `name`. Update endpoints are of the format `/name/update?key=value&key2=value2`. When `HttpServer` receives a request, it parses the path and key-value parameters. Each peripheral that is added to `DeviceWebApp` has a callback registered with its name that forwards to `peripheral->handle_update()` with a map of parameters.
 
 
 ## Next Steps
@@ -104,7 +104,7 @@ A big next step is adding the first sensor-based Peripheral type. The Rover curr
 - Implement `SensorInterface` as an extension of `PeripheralInterface` for polling.
 - Have `DeviceWebApp` aware of sensor-vs-control peripherals, and add an optional argument to `add_peripheral()` for a refresh rate.
 
-Another decision is whether the polling happens on the server - in Javascript - or using FreeRTOS for timing (of course the server is running on FreeRTOS, but there are layers of explicitness). The decision of where to put polling logic and what language to write it in must be made together.
+Another decision is whether the polling happens within the browser-side JavaScript or using FreeRTOS for timing (of course the server is running on FreeRTOS, but there are layers of explicitness). The decision of where to put polling logic and what language to write it in must be made together.
 
 
 Up next: {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-local-gtest-build.md" | first %}
