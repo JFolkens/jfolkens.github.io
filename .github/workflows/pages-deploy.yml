@@ -2,7 +2,7 @@ name: "Build and Deploy"
 on:
   push:
     branches:
-      - rover
+      - main
     paths-ignore:
       - .gitignore
       - README.md
