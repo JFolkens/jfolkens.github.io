@@ -16,7 +16,7 @@ Unit testing is important and is particularly difficult on embedded platforms. T
 | **Portability** | Low | High |
 | **Automation** | Low | High |
 
-Off-target tests are useful for testing complex pieces of non-embedded logic. On-target tests require a second binary to be flashed to your device; they are less convenient and so tend to be run less often, but are the only option for exposing low-level or hardware bugs. For an in-depth discussion of embedded testing, see James W. Grenning's book on [Test-Driven Development for Embedded C](https://www.amazon.com/dp/193435662X?lv=shuf&channelId=500&plpRedirect=mhFallback).
+Off-target tests are useful for testing complex pieces of non-embedded logic. On-target tests require a second binary to be flashed to your device; they are less convenient and so tend to be run less often, but are the best option for validating board and peripheral behavior. For an in-depth discussion of embedded testing, see James W. Grenning's book on [Test-Driven Development for Embedded C](https://www.amazon.com/dp/193435662X?lv=shuf&channelId=500&plpRedirect=mhFallback).
 
 Rover uses the {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
 <a href="{{ my_post.url | relative_url }}">Web-Peripheral Interface</a> for on-target testing and debugging of new hardware. This post covers off-target unit testing via the GoogleTest framework.
@@ -75,7 +75,7 @@ The script `run_unit_tests.bat` runs the resulting test executeable.
 
 ## Example Unit Test: `HttpServerInterface`
 
-`HttpServer` is a hardware device with non-trivial logic and testing.
+`HttpServer` is a software module tightly integrated with ESP32 libraries, with non-trivial logic and testing.
 
 ```text
 rover/

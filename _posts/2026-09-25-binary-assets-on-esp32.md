@@ -37,7 +37,7 @@ The basic idea is simple:
 
 The trick was getting it to work.
 
-C++26 has native embedding of binary assets, but this would have meant upgrading my toolchain (if I do go that route, there will be a follow-on post). The ESP32 is a micro-controller; it doesn't have a file system. Files have to be packaged into the binary with their memory locations mapped as variables that C++ can understand.
+C++26 has native embedding of binary assets, but this would have meant upgrading my toolchain (if I do go that route, there will be a follow-on post). While the ESP32 microcontroller can support small filesystems, this project instead uses embedded assets. Files are packaged into the binary with their memory locations mapped as variables that C++ can understand.
 
 ## Adding assets to the ESP32 build
 
@@ -64,7 +64,7 @@ idf_component_register(
 
 There is also `EMBED_FILES` for binary assets.
 
-Once the assets are embedded, they can be linked using symbols made available through the ESP-IDF compilation process. The [Espressif docs](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/build-system.html) show an example of adding the binary data to source files via an `extern const uint8_t` declaration.
+Once the assets are embedded, they can be linked using symbols made available through the ESP-IDF compilation process. The [Espressif docs for v6.0.3](https://docs.espressif.com/projects/esp-idf/en/v6.0.3/esp32/api-guides/build-system.html) show an example of adding the binary data to source files via an `extern const uint8_t` declaration.
 
 The docs say to use the "full name of the file, as given in `EMBED_FILES`". This felt a little magick-y to me, but I hooked it all up. Linkage failed due to to the symbol not being found.
 
@@ -83,7 +83,7 @@ The linked binary lives in the build/ folder next to main/. It can be inspected 
 
 `xtensa-esp32-elf-nm -C .\build\esp-idf\main\libmain.a`
 
-If you're like me and you use VS Code to handle ESP-IDF via the extension, you may not remember where your ESP32 tooling was installed. Type `Ctrl+Shift+P` and search for the option "ESP-IDF: Open ESP-IDF Terminal". The terminal will have `xtensa-esp32-elf-nm` in its path.
+If you're like me and you use VS Code to handle ESP-IDF via the extension, you may not remember where your ESP32 tooling was installed. Type `Ctrl+Shift+P` and search for the option "ESP-IDF: Open ESP-IDF Terminal". The terminal will have `xtensa-esp32-elf-nm` in its path. Running `--version` shows my current installation at 15.2.0.
 
 To search the linked file for the asset symbols, run:
 
