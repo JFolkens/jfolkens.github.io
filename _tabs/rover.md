@@ -12,12 +12,12 @@ Rover is an ESP-32 powered car controlled through a hosted web server.
 
 ## Posts
 
-- Overview *(coming soon)*
+- {% assign my_post = site.posts | where: "path", "_posts/2026-10-11-rover-overview.md" | first %}
+<a href="{{ my_post.url | relative_url }}">Rover: Overview</a>
 - {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-modular-embedded-design-the-web-peripheral-interface.md" | first %}
 <a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
 - {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-local-gtest-build.md" | first %}
 <a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
-- Evaluating Binary Size and Updating the Partition Table *(coming soon)*
 - {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-binary-assets-on-esp32.md" | first %}
 <a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
 
