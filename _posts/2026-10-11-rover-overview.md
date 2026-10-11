@@ -30,7 +30,7 @@ Rover uses two L298N dual-motor control boards to control four wheels independen
 
 Rover is powered from a battery pack mounted on the bottom of the chassis. This keeps the pack low and centered, while still being easy to remove. The frame is a basic aluminum template off [Amazon](https://www.amazon.com/DWWTKL-Omnidirectional-Educational-Raspberry-Unassembled/dp/B0CBRBCFMZ) which can be drilled through with essentially any drill bit.
 
-<div style="display: grid; grid-template-columns: 30% 30%; gap: 10%; justify-content: center;">
+<div style="display: grid; grid-template-columns: 30% 30%; gap: 10%; justify-content: center; padding-bottom: 20px;">
   <figure style="margin: 0; text-align: center;">
     <img src="/assets/img/rover/rover_bottom.jpg" width="100%" alt="Rover upside down showing battery pack" />
     <em>Rover upside down</em>
@@ -43,21 +43,33 @@ Rover is powered from a battery pack mounted on the bottom of the chassis. This 
 
 The battery supplies power to the motors via a strip of perfboard that I call my high-voltage rail (because I like to feel fancy). It also provides input to DC buck converter that provides a smooth 5V for the ESP32 board.
 
-![High-voltage rail powers motors and contains a DC step-down chip](/assets/img/rover/high_voltage_rail.jpg){:style="width:40%; display:block; margin-left:auto; margin-right:auto"}
-*High-voltage rail takes battery power and distributes to motor controllers and DC down converter.*
-
 ESP32 DevKit V1 has ports to accept 5V or 3.3V power. The MP1584 Buck Converter is tuned via a small screw on the top; I set it to 5V and connected it to the ESP32 perf board via JST connector.
+
+<div style="display: grid; grid-template-columns: 40% 40%; gap: 10%; justify-content: center; padding-bottom: 20px;">
+  <figure style="margin: 0; text-align: center;">
+    <img src="/assets/img/rover/high_voltage_rail.jpg" width="100%" alt="High-voltage rail powers motors and contains a DC step-down chip" />
+    <em>High-voltage rail takes battery power and distributes to motor controllers and DC down converter.</em>
+  </figure>
+  <figure style="margin: 0; text-align: center;">
+    <img src="/assets/img/rover/esp32_power_cable.jpg" width="100%" alt="Power cable from high-voltage rail to JST on ESP32 perfboard">
+    <em>Power comes onto ESP32 board via JST connector to VIN/GND.</em>
+  </figure>
+</div>
+
+Notice how the micro-usb for the ESP32 is hanging off the edge of the frame. This makes it easy to connect and upload code.
+
+Here is a full wiring diagram:
 
 ![Rover battery, power rails, motor drivers, and 5 V buck converter](/assets/img/diagrams/rover_power.png)
 *Power distribution for the motor drivers and ESP32 DevKit V1.*
 
-The battery uses two 3400 mAh cells in a 2S series pack. In a series pack the
-voltage adds while the amp-hour capacity remains about 3400 mAh; the cell
-capacities do not add to 6800 mAh. Capacity alone also does not establish
-runtime, which I have not measured under a defined test condition.
 
-![Rover electronics mounted on perfboard](/assets/img/rover/esp32_perfboard.jpg){:style="width:75%; display:block; margin-left:auto; margin-right:auto"}
-*The ESP32 and power wiring on the rover.*
+
+
+
+<!-- TODO: Clean up this section, this is a rough draft that AI wrote from my prompt -->
+<!-- 
+
 
 ## Software and control path
 
@@ -161,4 +173,4 @@ Keep real credentials out of source control.
 
 For more detail, continue with the [Web-Peripheral Interface]({% post_url 2026-09-25-modular-embedded-design-the-web-peripheral-interface %}),
 [Unit Testing an Embedded Platform]({% post_url 2026-09-25-local-gtest-build %}),
-and [Binary Assets on ESP32]({% post_url 2026-09-25-binary-assets-on-esp32 %}) posts.
+and [Binary Assets on ESP32]({% post_url 2026-09-25-binary-assets-on-esp32 %}) posts. -->
