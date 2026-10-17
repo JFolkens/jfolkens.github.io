@@ -21,4 +21,9 @@ Rover is an ESP-32 powered car controlled through a hosted web server.
 - {% assign my_post = site.posts | where: "path", "_posts/2026-09-25-binary-assets-on-esp32.md" | first %}
 <a href="{{ my_post.url | relative_url }}">{{ my_post.title }}</a>
 
-<video width="50%" src="/assets/img/rover/rover_video_cropped.mp4" controls autoplay muted playsinline></video>
+<div style="display: grid; grid-template-columns: 80%; justify-content: center; padding-bottom: 20px;">
+  <video width="90%" controls muted playsinline>
+    <source src="/assets/video/rover_dance_video_2.mp4" type="video/mp4">
+    Your browser does not support embedded video.
+  </video>
+</div>

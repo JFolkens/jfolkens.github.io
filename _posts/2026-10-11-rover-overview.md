@@ -41,17 +41,17 @@ Rover is powered from a battery pack mounted on the bottom of the chassis. This 
   </figure>
 </div>
 
-The battery supplies power to the motors via a strip of perfboard that I call my high-voltage rail (because I like to feel fancy). It also provides input to DC buck converter that provides a smooth 5V for the ESP32 board.
+The battery supplies power to the motors via a strip of perfboard that I call my high-voltage rail (because I like to feel fancy). It also provides input to DC buck converter that provides a regulated 5V for the ESP32 board.
 
 ESP32 DevKit V1 has ports to accept 5V or 3.3V power. The MP1584 Buck Converter is tuned via a small screw on the top; I set it to 5V and connected it to the ESP32 perf board via JST connector.
 
 <div style="display: grid; grid-template-columns: 40% 40%; gap: 10%; justify-content: center; padding-bottom: 20px;">
   <figure style="margin: 0; text-align: center;">
-    <img src="/assets/img/rover/high_voltage_rail.jpg" width="100%" alt="High-voltage rail powers motors and contains a DC step-down chip" />
-    <em>High-voltage rail takes battery power and distributes to motor controllers and DC down converter.</em>
+    <img src="/assets/img/rover/high_voltage_rail.jpg" width="100%" alt="8V battery rail powers motors and contains a DC step-down chip" />
+    <em>8V battery rail takes battery power and distributes to motor controllers and DC down converter.</em>
   </figure>
   <figure style="margin: 0; text-align: center;">
-    <img src="/assets/img/rover/esp32_power_cable.jpg" width="100%" alt="Power cable from high-voltage rail to JST on ESP32 perfboard">
+    <img src="/assets/img/rover/esp32_power_cable.jpg" width="100%" alt="Power cable from 8V rail to JST on ESP32 perfboard">
     <em>Power comes onto ESP32 board via JST connector to VIN/GND.</em>
   </figure>
 </div>
@@ -78,11 +78,13 @@ The firmware targets the ESP32 DevKit V1 and was built with ESP-IDF v6.0.2. Setu
 
 The [Rover codebase](https://github.com/JFolkens/esp32_peripheral_debug/tree/rover_v1) is publicly available on Github, and the rest of the posts on this webpage cover the software design and architecture for the platform.
 
+I am primarily a software engineer; the posts focus on software because that is the content I want to break out and get excited about. The hardware is exciting, but not something I am qualified to write about.
+
 ## Rover in action
 
 <div style="display: grid; grid-template-columns: 80%; justify-content: center; padding-bottom: 20px;">
   <video width="60%" controls muted playsinline>
-    <source src="/assets/img/rover/rover_video_cropped.mp4" type="video/mp4">
+    <source src="/assets/video/rover_video_cropped.mp4" type="video/mp4">
     Your browser does not support embedded video.
   </video>
 </div>
@@ -93,7 +95,7 @@ Rover is current v1: a basic platform with known limitations. Future design spir
 
 - Rover's drivetrain is currently open loop because I have not yet purchased and installed wheel encoders. This gives the platform a bit of a stagger since the motors and wheels are operating at slightly different strengths.
 
-- The motor control logic is basic - "speed" is raw PWM duty cycle. With the 8V batteries, the PWM has to hit 70% before the wheels move. Once encoders are installed, I can implement an actual PID control algorithm.
+- The motor control logic is basic - "speed" is raw PWM duty cycle. With the 8V batteries, the PWM has to hit roughly 70% before the wheels move, and this threshold varies by wheel. Once encoders are installed, I can implement an actual PID control algorithm.
 
 - Rover is not Wi-fi drop safe. That is, if my Wi-fi goes down, it will continue on its current path until I can catch it. Adding and testing a connection-loss behavior would be more "safe" (for my shins).
 
